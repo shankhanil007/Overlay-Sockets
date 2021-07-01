@@ -19,6 +19,25 @@ const obj = [
   },
 ];
 
-io.on("connection", (socket) => {
-  console.log("user connected");
+const users = {};
+
+io.on("connect", (socket) => {
+  socket.on("join", ({ name }, callback) => {
+    users[socket.id] = name;
+
+    callback();
+  });
+
+  socket.on("post-question", (name) => {
+    if (name.localeCompare("Teacher") == 0) {
+      socket.broadcast.emit("pop-up", {
+        message: obj,
+        name: users[socket.id],
+      });
+    }
+  });
 });
+
+server.listen(process.env.PORT || 5000, () =>
+  console.log(`Server has started on  port 5000.`)
+);
